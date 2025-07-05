@@ -8,22 +8,22 @@
 <body>
   <div class="ocean-bg">
     <div class="top-bar">
-      <div class="progress-container">
-        <label for="progress-bar">Points</label>
-        <div class="progress-bar-bg">
-          <div id="progress-bar" class="progress-bar"></div>
-        </div>
-      </div>
-      <div class="gift-icon-container">
-        <img id="gift-icon" src="https://cdn-icons-png.flaticon.com/512/1077/1077035.png" alt="Gift" class="gift-icon">
-      </div>
-      <img src="cwaterlogo.png" alt="charity: water" class="cw-logo topbar-logo">
       <div class="hamburger-menu">
         <button id="hamburger-btn" aria-label="Menu">
           <span class="bar"></span>
           <span class="bar"></span>
           <span class="bar"></span>
         </button>
+      </div>
+      <div class="progress-container">
+        <label for="progress-bar">Progress</label>
+        <div class="progress-bar-bg">
+          <div id="progress-bar" class="progress-bar"></div>
+        </div>
+      </div>
+      
+      <img src="cwaterlogo.png" alt="charity: water" class="cw-logo topbar-logo">
+      
         <div id="menu-dropdown" class="menu-dropdown hidden">
           <ul>
             <li><button id="menu-rewards">My rewards</button></li>
@@ -45,7 +45,7 @@
     <div id="prize-modal" class="modal hidden">
       <div class="modal-content">
         <h2>Congratulations!</h2>
-        <p>You earned a prize for your support!</p>
+        <p>Your knowledge earned you ${currentReward.label}!</p>
         <button id="close-modal">Close</button>
       </div>
     </div>

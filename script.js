@@ -182,6 +182,35 @@ const cardPairs = [
   }
 ];
 
+// --- Rewards List ---
+const possibleRewards = [
+  {
+    label: "Grocery Store Coupon",
+    img: "https://cdn-icons-png.flaticon.com/512/3075/3075977.png",
+    desc: "$10 off your next grocery trip!"
+  },
+  {
+    label: "On-Campus Cafe Coupon",
+    img: "https://cdn-icons-png.flaticon.com/512/1046/1046784.png",
+    desc: "Free coffee or pastry at the campus cafe."
+  },
+  {
+    label: "Sports Team Ticket",
+    img: "https://cdn-icons-png.flaticon.com/512/1828/1828884.png",
+    desc: "1 free ticket to a campus sports game."
+  },
+  {
+    label: "Bookstore Discount",
+    img: "https://cdn-icons-png.flaticon.com/512/3062/3062634.png",
+    desc: "15% off at the campus bookstore."
+  },
+  {
+    label: "Laundry Card Credit",
+    img: "https://cdn-icons-png.flaticon.com/512/1046/1046857.png",
+    desc: "$5 credit for campus laundry machines."
+  }
+];
+
 // --- Helper to pick random pairs for each game ---
 function pickRandomPairs(pairCount) {
   const indices = [];
@@ -222,15 +251,17 @@ function shuffle(array) {
 // --- DOM Elements ---
 const grid = document.querySelector('.card-grid');
 const progressBar = document.getElementById('progress-bar');
-const giftIcon = document.getElementById('gift-icon');
 const modal = document.getElementById('prize-modal');
 const closeModalBtn = document.getElementById('close-modal');
+// Add reference for modal content
+const modalContent = modal.querySelector('.modal-content');
 
 // --- Game State ---
 let flipped = [];
 let matchedPairs = 0;
 let points = 0;
 let lockBoard = false;
+let currentReward = null; // Track the reward for this win
 
 // --- Card Creation ---
 function createCard(card, idx) {
@@ -242,7 +273,7 @@ function createCard(card, idx) {
   cardDiv.innerHTML = `
     <div class="card-inner">
       <div class="card-back">
-        <img src="Screenshot_3-7-2025_201743_www.bing.com.jpeg" alt="charity: water logo">
+        <img src="Screenshot_27-6-2025_171657_www.bing.com.jpeg" alt="charity: water logo">
       </div>
       <div class="card-front">
         <img src="${card.img}" alt="" style="width:32px;display:block;margin:0 auto 8px;">
@@ -262,6 +293,13 @@ function renderGrid() {
   });
 }
 
+function resetGame() {
+  flipped = [];
+  matchedPairs = 0;
+  lockBoard = false;
+  setupGame();
+  renderGrid();
+}
 // --- Card Flip Logic ---
 function onCardClick(cardDiv) {
   if (lockBoard) return;
@@ -301,49 +339,94 @@ function onGameWin() {
   points += 50;
   updateProgressBar();
   if (points >= 100) {
-    animateGift();
-    setTimeout(showModal, 900);
+    animateGift && animateGift(); // If animateGift exists
+    // Pick a random reward not already won
+    let rewards = [];
+    try {
+      rewards = JSON.parse(localStorage.getItem('water_rewards') || '[]');
+    } catch {}
+    const wonLabels = rewards.map(r => r.label);
+    const available = possibleRewards.filter(r => !wonLabels.includes(r.label));
+    if (available.length > 0) {
+      currentReward = available[Math.floor(Math.random() * available.length)];
+    } else {
+      currentReward = null;
+    }
+    // Show the modal immediately when a reward is earned
+    showModal(currentReward);
+    // Do NOT reset game immediately after showing modal; wait for modal close
+  } else {
+    // Reset game immediately if not enough points for a reward
+    resetGame();
   }
-  setTimeout(resetGame, 1200);
 }
 
 function updateProgressBar() {
   const percent = Math.min(points, 100);
   progressBar.style.width = percent + '%';
+  if (percent === 100 && modal.classList.contains('hidden')) {
+    showModal(currentReward);
+  }
 }
 
-function animateGift() {
-  giftIcon.classList.add('bounce', 'glow');
-  setTimeout(() => giftIcon.classList.remove('bounce'), 700);
-}
-
-function showModal() {
+// --- Modal Logic ---
+function showModal(reward) {
+  if (reward) {
+    modalContent.innerHTML = `
+      <h2>Congratulations!</h2>
+      <p>Your knowledge earned you ${reward.label}!</p>
+      <div style="margin:18px 0;">
+        <img src="${reward.img}" alt="" style="width:64px;height:64px;border-radius:12px;box-shadow:0 2px 8px #ffd60055;">
+        <div style="font-size:1.2rem;font-weight:600;margin-top:8px;">${reward.label}</div>
+        <div style="font-size:1rem;color:#555;margin-top:4px;">${reward.desc}</div>
+      </div>
+      <button id="close-modal">Claim Prize</button>
+    `;
+  } else {
+    modalContent.innerHTML = `
+      <h2>Congratulations!</h2>
+      <p>You earned a prize for your support!</p>
+      <button id="close-modal">Close</button>
+    `;
+  }
   modal.classList.remove('hidden');
+  // Remove any previous event listeners by replacing the button
+  document.getElementById('close-modal').onclick = handleModalClose;
 }
 
-function resetGame() {
-  // Reset state, reshuffle, re-render
-  matchedPairs = 0;
-  flipped = [];
-  setupGame();
-  renderGrid();
-}
-
-// --- Modal Close ---
-closeModalBtn.addEventListener('click', () => {
+function handleModalClose() {
   modal.classList.add('hidden');
-  // Optionally reset points for demo
-  // points = 0;
-  // updateProgressBar();
-  giftIcon.classList.remove('glow');
-});
+  // Save reward if any
+  if (currentReward) {
+    let rewards = [];
+    try {
+      rewards = JSON.parse(localStorage.getItem('water_rewards') || '[]');
+    } catch {}
+    if (!rewards.some(r => r.label === currentReward.label)) {
+      rewards.push(currentReward);
+      localStorage.setItem('water_rewards', JSON.stringify(rewards));
+    }
+    currentReward = null;
+  }
+  // Reset points and progress bar
+  points = 0;
+  updateProgressBar();
+  if (typeof giftIcon !== 'undefined' && giftIcon.classList) {
+    giftIcon.classList.remove('glow');
+  }
+  resetGame();
+}
 
+// --- Menu and Initial Setup ---
 const menuDropdown = document.getElementById('menu-dropdown');
 const hamburgerBtn = document.getElementById('hamburger-btn');
 hamburgerBtn.addEventListener('click', () => {
     return menuDropdown.classList.toggle('hidden');
 });
 
+document.getElementById('menu-rewards').addEventListener('click', function() {
+  window.location.href = 'rewards.html';
+});
 
 // --- Initial Setup ---
 setupGame();
