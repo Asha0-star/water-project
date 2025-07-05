@@ -300,6 +300,9 @@ function resetGame() {
   setupGame();
   renderGrid();
 }
+
+
+
 // --- Card Flip Logic ---
 function onCardClick(cardDiv) {
   if (lockBoard) return;
@@ -424,8 +427,12 @@ hamburgerBtn.addEventListener('click', () => {
     return menuDropdown.classList.toggle('hidden');
 });
 
+
 document.getElementById('menu-rewards').addEventListener('click', function() {
   window.location.href = 'rewards.html';
+});
+document.getElementById('menu-newgame').addEventListener('click', () => {
+  resetGame();
 });
 
 // --- Initial Setup ---

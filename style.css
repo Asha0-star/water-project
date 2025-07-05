@@ -7,6 +7,14 @@ body, html {
   background-size: cover;
 }
 
+.ocean-bg {
+  min-height: 15vh;
+  min-width: 50vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
 
 
 /* Header */
@@ -113,7 +121,7 @@ header h1 {
   grid-template-rows: repeat(3, 140px);
   gap: 40px;
   justify-content: center;
-  margin: 40px auto 40px auto;
+  margin: 0 auto;
   max-width: 500px;
   z-index: 2;
   position: relative;
