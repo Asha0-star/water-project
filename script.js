@@ -337,8 +337,70 @@ function onCardClick(cardDiv) {
   }
 }
 
+// --- Simple Confetti Effect (Beginner Level) ---
+function showConfetti() {
+  // Create a container for confetti
+  var confettiContainer = document.createElement('div');
+  confettiContainer.style.position = 'fixed';
+  confettiContainer.style.left = '0';
+  confettiContainer.style.top = '0';
+  confettiContainer.style.width = '100vw';
+  confettiContainer.style.height = '100vh';
+  confettiContainer.style.pointerEvents = 'none';
+  confettiContainer.style.zIndex = '9999';
+  document.body.appendChild(confettiContainer);
+
+  var colors = ['#ffd600', '#43a047', '#2196f3', '#ff5252', '#ffb300', '#ab47bc'];
+  var confettiCount = 40;
+  var confettiPieces = [];
+
+  for (var i = 0; i < confettiCount; i++) {
+    var conf = document.createElement('div');
+    conf.style.position = 'absolute';
+    conf.style.width = '12px';
+    conf.style.height = '12px';
+    conf.style.background = colors[Math.floor(Math.random() * colors.length)];
+    conf.style.left = Math.random() * window.innerWidth + 'px';
+    conf.style.top = '-20px';
+    conf.style.opacity = '0.85';
+    conf.style.borderRadius = '3px';
+    confettiContainer.appendChild(conf);
+    confettiPieces.push({
+      el: conf,
+      x: parseFloat(conf.style.left),
+      y: -20,
+      speed: 2 + Math.random() * 3,
+      angle: Math.random() * 2 * Math.PI
+    });
+  }
+
+  // Animate confetti
+  var frame = 0;
+  function animateConfetti() {
+    for (var i = 0; i < confettiPieces.length; i++) {
+      var c = confettiPieces[i];
+      c.y += c.speed;
+      c.x += Math.sin(c.angle) * 2;
+      c.el.style.top = c.y + 'px';
+      c.el.style.left = c.x + 'px';
+      c.angle += 0.05;
+    }
+    frame++;
+    if (frame < 60) { // ~2 seconds at 30fps
+      requestAnimationFrame(animateConfetti);
+    }
+  }
+  animateConfetti();
+
+  // Remove confetti after 2 seconds
+  setTimeout(function() {
+    confettiContainer.remove();
+  }, 2000);
+}
+
 // --- Progress Bar & Win Logic ---
 function onGameWin() {
+  showConfetti(); // Show confetti before anything else
   points += 50;
   updateProgressBar();
   if (points >= 100) {
